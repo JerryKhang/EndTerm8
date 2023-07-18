@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lí học sinh</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5 mb-5">Thông tin học sinh</h2>
+        <div class="mb-5">
+            <div class="row">
+                <div class="form-group col-md-6 mb-3">
+                    <label for="name">Tên</label>
+                    <input type="text" name="name" class="form-control" placeholder="Tên" id="name">
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label for="name">Lớp</label>
+                    <input type="text" name="room" class="form-control" placeholder="Lớp" id="room">
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label for="name">Địa chỉ</label>
+                    <input type="text" name="address" class="form-control" placeholder="Địa chỉ" id="address">
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label for="name">Email</label>
+                    <input type="text" name="email" class="form-control" placeholder="Email/Gmail" id="email">
+                </div>
+                <div class="col-lg-12 mt-5">
+                    <button type="button" class="btn btn-success" id="submit" onclick="addData()">Thêm học sinh</button>
+                    <button type="button" class="btn btn-success" id="update" style="display:none" onclick="addData()">Update</button>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row mt-5">
+            <div class="col-12">
+                <table class="table table-bordered" id="danhsach">
+                    <thead>
+                        <tr>
+                            <th>Tên</th>
+                            <th>Lớp</th>
+                            <th>Địa chỉ</th>
+                            <th>Email</th>
+                            <th>Chỉnh sửa</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        //xác thực dữ liệu
+        function validateForm(){
+            var name = document.getElementById("name").value;
+            var room = document.getElementById("room").value;
+            var address = document.getElementById("address").value;
+            var email = document.getElementById("email").value;
+            if (name == ""){
+                alert("Hãy nhập tên đầy đủ")
+                return false;
+            }
+            if (room == ""){
+                alert("Hãy nhập lớp đầy đủ")
+                return false;
+            }
+            else if(room < 0){
+                alert ("Lớp phải lớn hơn 0")
+            }
+            if (address == ""){
+                alert("Hãy nhập địa chỉ")
+                return false;
+            }
+            else if (!email.includes("@")){
+                alert("Hãy nhập email/gmail hợp lệ")
+                return false;
+            }
+
+            return true
+        }
+        //hiện dữ liệu đã nhập
+        function showData(){
+            var peopleList;
+            if (localStorage.getItem("peopleList") == null){
+                peopleList = [];
+            }
+            else{
+                peopleList = JSON.parse(localStorage.getItem("peopleList"));
+            }
+            var html = "";
+            peopleList.forEach(function (element,index){
+                html += "<tr>";
+                html += "<td>" + element.name + "</td>";
+                html += "<td>" + element.room + "</td>";
+                html += "<td>" + element.address + "</td>";
+                html += "<td>" + element.email + "</td>";
+                html += '<td><button onclick="deleteData('+index+')" class = "btn btn-danger">Delete</button>   <button onclick="updateData('+index+')" class = "btn btn-warning">Edit</button></td>';
+                html += "</tr>";
+            });
+            document.querySelector("#danhsach tbody").innerHTML = html;
+        }
+        //Load data khi mở/refresh page
+        document.onload = showData();
+
+        function addData(){
+            if (validateForm() == true){
+                var name = document.getElementById("name").value;
+                var room = document.getElementById("room").value;
+                var address = document.getElementById("address").value;
+                var email = document.getElementById("email").value;
+
+                var peopleList;
+                if (localStorage.getItem("peopleList") == null){
+                    peopleList = [];
+                }
+                else{
+                    peopleList = JSON.parse(localStorage.getItem("peopleList"));
+                }
+
+                peopleList.push({
+                    name: name,
+                    room: room,
+                    address: address,
+                    email: email,
+                });
+
+                localStorage.setItem("peopleList", JSON.stringify(peopleList));
+                showData();
+                document.getElementById("name").value = "";
+                document.getElementById("room").value = "";
+                document.getElementById("address").value = "";
+                document.getElementById("email").value = "";
+            }
+        }
+        function deleteData(index){
+            var peopleList;
+            if (localStorage.getItem("peopleList") == null){
+                peopleList = [];
+            }
+            else{
+                 peopleList = JSON.parse(localStorage.getItem("peopleList"));
+            }
+            peopleList.splice(index,1);
+            localStorage.setItem("peopleList", JSON.stringify(peopleList));
+            showData();
+        }
+        function updateData(index){
+            document.getElementById("submit").style.display="none";
+            document.getElementById("update").style.display="block";
+
+            var peopleList;
+            if (localStorage.getItem("peopleList") == null){
+                peopleList = [];
+            }
+            else{
+                 peopleList = JSON.parse(localStorage.getItem("peopleList"));
+            }
+            document.getElementById("name").value = peopleList[index].name;
+            document.getElementById("room").value = peopleList[index].room;
+            document.getElementById("address").value = peopleList[index].address;
+            document.getElementById("email").value = peopleList[index].email;
+
+            document.querySelector("#update").onclick = function(){
+                if (validateForm() == true){
+                    document.getElementById("name").value = peopleList[index].name;
+                    document.getElementById("room").value = peopleList[index].room;
+                    document.getElementById("address").value = peopleList[index].address;
+                    document.getElementById("email").value = peopleList[index].email;
+
+                    localStorage.setItem("peopleList", JSON.stringify(peopleList));
+                    showData();
+                    document.getElementById("name").value = "";
+                    document.getElementById("room").value = "";
+                    document.getElementById("address").value = "";
+                    document.getElementById("email").value = "";
+                    
+                    document.getElementById("submit").style.display="block";
+                    document.getElementById("update").style.display="none";
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
